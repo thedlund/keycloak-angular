@@ -7,23 +7,6 @@
  */
 
 /**
- * Keycloak onload options: 'login-required' or 'check-sso'
- */
-export type KeycloakOnLoad = 'login-required' | 'check-sso';
-/**
- * Keycloak response mode options: 'query' or 'fragment'
- */
-export type KeycloakResponseMode = 'query' | 'fragment';
-/**
- * Keycloak response type options: 'code' or 'id_token token' or 'code id_token token'
- */
-export type KeycloakResponseType = 'code' | 'id_token token' | 'code id_token token';
-/**
- * Keycloak flow: 'standard' or 'implicit' or 'hybrid'
- */
-export type KeycloakFlow = 'standard' | 'implicit' | 'hybrid';
-
-/**
  * Definitions file from KeycloakInitOptions, from keycloak-js library.
  */
 export interface KeycloakInitOptions {

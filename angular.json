@@ -7,18 +7,13 @@
       "root": "projects/keycloak-angular",
       "sourceRoot": "projects/keycloak-angular/src",
       "projectType": "library",
-      "prefix": "lib",
+      "prefix": "ka",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-ng-packagr:build",
           "options": {
             "tsConfig": "projects/keycloak-angular/tsconfig.lib.json",
             "project": "projects/keycloak-angular/ng-package.json"
-          },
-          "configurations": {
-            "production": {
-              "project": "projects/keycloak-angular/ng-package.prod.json"
-            }
           }
         },
         "test": {

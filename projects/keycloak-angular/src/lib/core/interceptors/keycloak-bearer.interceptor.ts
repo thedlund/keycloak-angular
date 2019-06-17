@@ -7,18 +7,13 @@
  */
 
 import { Injectable } from '@angular/core';
-import {
-  HttpInterceptor,
-  HttpRequest,
-  HttpHandler,
-  HttpEvent
-} from '@angular/common/http';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
 import { KeycloakService } from '../services/keycloak.service';
-import { ExcludedUrlRegex } from '../interfaces/keycloak-options';
+import { ExcludedUrlRegex } from '../models/keycloak-options';
 
 /**
  * This interceptor includes the bearer by default in all HttpClient requests.
@@ -43,8 +38,7 @@ export class KeycloakBearerInterceptor implements HttpInterceptor {
     { urlPattern, httpMethods }: ExcludedUrlRegex
   ): boolean {
     let httpTest =
-      httpMethods.length === 0 ||
-      httpMethods.join().indexOf(method.toUpperCase()) > -1;
+      httpMethods.length === 0 || httpMethods.join().indexOf(method.toUpperCase()) > -1;
 
     let urlTest = urlPattern.test(url);
 
@@ -58,17 +52,13 @@ export class KeycloakBearerInterceptor implements HttpInterceptor {
    * @param req
    * @param next
    */
-  public intercept(
-    req: HttpRequest<any>,
-    next: HttpHandler
-  ): Observable<HttpEvent<any>> {
+  public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const { enableBearerInterceptor, excludedUrls } = this.keycloak;
     if (!enableBearerInterceptor) {
       return next.handle(req);
     }
 
-    const shallPass: boolean =
-      excludedUrls.findIndex(item => this.isUrlExcluded(req, item)) > -1;
+    const shallPass: boolean = excludedUrls.findIndex(item => this.isUrlExcluded(req, item)) > -1;
     if (shallPass) {
       return next.handle(req);
     }
