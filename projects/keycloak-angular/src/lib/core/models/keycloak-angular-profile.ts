@@ -6,4 +6,8 @@
  * found in the LICENSE file at https://github.com/mauriciovigolo/keycloak-angular/LICENSE
  */
 
-export interface BearerInterceptorOption {}
+import * as Keycloak from 'keycloak-js';
+
+export interface KeycloakAngularProfile extends Keycloak.KeycloakProfile {
+  attributes: any;
+}

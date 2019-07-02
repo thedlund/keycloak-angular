@@ -11,6 +11,29 @@
  */
 export type HttpMethods = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS' | 'HEAD' | 'PATCH';
 
+/**
+ * ExcludedUrl type may be used to specify the url and the HTTP method that
+ * should not be intercepted by the KeycloakBearerInterceptor.
+ *
+ * Example:
+ * const excludedUrl: ExcludedUrl[] = [
+ *  {
+ *    url: 'reports/public'
+ *    httpMethods: ['GET']
+ *  }
+ * ]
+ *
+ * In the example above for URL reports/public and HTTP Method GET the
+ * bearer will not be automatically added.
+ *
+ * If the url is informed but httpMethod is undefined, then the bearer
+ * will not be added for all HTTP Methods.
+ */
+export type UrlMatcher = {
+  url: string;
+  httpMethods?: HttpMethods[];
+};
+
 // TYPES FROM KEYCLOAK-JS
 /**
  * Keycloak onload options: 'login-required' or 'check-sso'

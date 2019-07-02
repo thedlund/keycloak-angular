@@ -6,11 +6,10 @@
  * found in the LICENSE file at https://github.com/mauriciovigolo/keycloak-angular/LICENSE
  */
 
-import { BearerInterceptorOption } from './bearer-interceptor-options.model';
-import { ExcludedUrl } from './excluded-url.model';
+import { BearerInterceptorOption } from './bearer-interceptor-options';
 
-import { KeycloakInitOptions } from '../interfaces/keycloak-init-options';
 import { KeycloakConfig } from '../interfaces/keycloak-config';
+import { KeycloakInitOptions } from '../interfaces/keycloak-init-options';
 
 /**
  * keycloak-angular initialization options.
@@ -30,40 +29,7 @@ export interface KeycloakOptions {
    */
   initOptions?: KeycloakInitOptions;
   /**
-   * By default all requests made by Angular HttpClient will be intercepted in order to
-   * add the bearer in the Authorization Http Header. However, if this is a not desired
-   * feature, the enableBearerInterceptor must be false.
-   *
-   * Briefly, if enableBearerInterceptor === false, the bearer will not be added
-   * to the authorization header.
-   *
-   * The default value is true.
+   * TODO: Add documentation to the new parameter
    */
-  enableBearerInterceptor?: boolean;
   bearerInterceptorOptions?: BearerInterceptorOption[];
-  /**
-   * String Array to exclude the urls that should not have the Authorization Header automatically
-   * added. This library makes use of Angular Http Interceptor, to automatically add the Bearer
-   * token to the request.
-   *
-   * @deprecated - This attribute will be removed in further versions. Please use bearerInterceptorOptions
-   * instead.
-   */
-  bearerExcludedUrls?: (string | ExcludedUrl)[];
-  /**
-   * This value will be used as the Authorization Http Header name. The default value is
-   * **Authorization**. If the backend expects requests to have a token in a different header, you
-   * should change this value, i.e: **JWT-Authorization**. This will result in a Http Header
-   * Authorization as "JWT-Authorization: bearer <token>".
-   */
-  authorizationHeaderName?: string;
-  /**
-   * This value will be included in the Authorization Http Header param. The default value is
-   * **bearer**, which will result in a Http Header Authorization as "Authorization: bearer <token>".
-   * If any other value is needed by the backend in the authorization header, you should change this
-   * value, i.e: **Bearer**.
-   *
-   * Warning: this value must be in compliance with the keycloak server instance and the adapter.
-   */
-  bearerPrefix?: string;
 }
