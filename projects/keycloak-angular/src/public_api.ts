@@ -6,9 +6,8 @@
  * found in the LICENSE file at https://github.com/mauriciovigolo/keycloak-angular/LICENSE
  */
 
-export { KeycloakConfig } from './lib/core/interfaces/keycloak-config';
+export { KeycloakConfig } from './lib/core/models/keycloak-config';
 export { KeycloakEvent, KeycloakEventType } from './lib/core/models/keycloak-event';
-export { KeycloakInitOptions } from './lib/core/interfaces/keycloak-init-options';
 export { KeycloakOptions } from './lib/core/models/keycloak-options';
 export { KeycloakAuthGuard } from './lib/core/services/keycloak-auth-guard';
 export { KeycloakService } from './lib/core/services/keycloak.service';

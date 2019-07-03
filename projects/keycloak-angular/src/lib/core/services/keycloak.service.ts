@@ -34,15 +34,10 @@ export class KeycloakService {
    */
   private _initOptions?: Keycloak.KeycloakInitOptions;
   /**
-   * When the implicit flow is choosen there must exist a silentRefresh, as there is
-   * no refresh token.
-   */
-  private _silentRefresh: boolean;
-  /**
    * Observer for the keycloak events
    */
   private _keycloakEvents$: Subject<KeycloakEvent> = new Subject<KeycloakEvent>();
-
+  
   /**
    * Keycloak initialization. It should be called to initialize the adapter.
    * Options is a object with 2 main parameters: config and initOptions. The first one
@@ -101,21 +96,21 @@ export class KeycloakService {
       this._instance = Keycloak(config);
 
       this.bindsKeycloakEvents();
+
       this._instance
         .init(initOptions)
         .success(async authenticated => {
-          if (authenticated && this._loadUserProfileAtStartUp) {
-            await this.loadUserProfile();
-          }
           resolve(authenticated);
         })
         .error(kcError => {
           let msg = 'An error happened during Keycloak initialization.';
           if (kcError) {
-            let { error, error_description } = kcError;
-            msg = msg.concat(
-              `\nAdapter error details:\nError: ${error}\nDescription: ${error_description}`
-            );
+            const { error, error_description } = kcError;
+            msg = msg.concat(`
+              Adapter error details:
+                Error: ${error}
+                Description: ${error_description}
+            `);
           }
           reject(msg);
         });
@@ -143,277 +138,277 @@ export class KeycloakService {
    * @returns
    * A void Promise if the login is successful and after the user profile loading.
    */
-  login(options: Keycloak.KeycloakLoginOptions = {}): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this._instance
-        .login(options)
-        .success(async () => {
-          if (this._loadUserProfileAtStartUp) {
-            await this.loadUserProfile();
-          }
-          resolve();
-        })
-        .error(() => reject(`An error happened during the login.`));
-    });
-  }
+  // login(options: Keycloak.KeycloakLoginOptions = {}): Promise<void> {
+  //   return new Promise((resolve, reject) => {
+  //     this._instance
+  //       .login(options)
+  //       .success(async () => {
+  //         if (this._loadUserProfileAtStartUp) {
+  //           await this.loadUserProfile();
+  //         }
+  //         resolve();
+  //       })
+  //       .error(() => reject(`An error happened during the login.`));
+  //   });
+  // }
 
-  /**
-   * Redirects to logout.
-   *
-   * @param redirectUri
-   * Specifies the uri to redirect to after logout.
-   * @returns
-   * A void Promise if the logout was successful, cleaning also the userProfile.
-   */
-  logout(redirectUri?: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const options: any = {
-        redirectUri
-      };
+  // /**
+  //  * Redirects to logout.
+  //  *
+  //  * @param redirectUri
+  //  * Specifies the uri to redirect to after logout.
+  //  * @returns
+  //  * A void Promise if the logout was successful, cleaning also the userProfile.
+  //  */
+  // logout(redirectUri?: string): Promise<void> {
+  //   return new Promise((resolve, reject) => {
+  //     const options: any = {
+  //       redirectUri
+  //     };
 
-      this._instance
-        .logout(options)
-        .success(() => {
-          this._userProfile = undefined;
-          resolve();
-        })
-        .error(() => reject('An error happened during logout.'));
-    });
-  }
+  //     this._instance
+  //       .logout(options)
+  //       .success(() => {
+  //         this._userProfile = undefined;
+  //         resolve();
+  //       })
+  //       .error(() => reject('An error happened during logout.'));
+  //   });
+  // }
 
-  /**
-   * Redirects to registration form. Shortcut for login with option
-   * action = 'register'. Options are same as for the login method but 'action' is set to
-   * 'register'.
-   *
-   * @param options
-   * login options
-   * @returns
-   * A void Promise if the register flow was successful.
-   */
-  register(options: Keycloak.KeycloakLoginOptions = { action: 'register' }): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this._instance
-        .register(options)
-        .success(() => {
-          resolve();
-        })
-        .error(() => reject('An error happened during the register execution.'));
-    });
-  }
+  // /**
+  //  * Redirects to registration form. Shortcut for login with option
+  //  * action = 'register'. Options are same as for the login method but 'action' is set to
+  //  * 'register'.
+  //  *
+  //  * @param options
+  //  * login options
+  //  * @returns
+  //  * A void Promise if the register flow was successful.
+  //  */
+  // register(options: Keycloak.KeycloakLoginOptions = { action: 'register' }): Promise<void> {
+  //   return new Promise((resolve, reject) => {
+  //     this._instance
+  //       .register(options)
+  //       .success(() => {
+  //         resolve();
+  //       })
+  //       .error(() => reject('An error happened during the register execution.'));
+  //   });
+  // }
 
-  /**
-   * Check if the user has access to the specified role. It will look for roles in
-   * realm and clientId, but will not check if the user is logged in for better performance.
-   *
-   * @param role
-   * role name
-   * @param resource
-   * resource name If not specified, `clientId` is used
-   * @returns
-   * A boolean meaning if the user has the specified Role.
-   */
-  isUserInRole(role: string, resource?: string): boolean {
-    let hasRole: boolean;
-    hasRole = this._instance.hasResourceRole(role, resource);
-    if (!hasRole) {
-      hasRole = this._instance.hasRealmRole(role);
-    }
-    return hasRole;
-  }
+  // /**
+  //  * Check if the user has access to the specified role. It will look for roles in
+  //  * realm and clientId, but will not check if the user is logged in for better performance.
+  //  *
+  //  * @param role
+  //  * role name
+  //  * @param resource
+  //  * resource name If not specified, `clientId` is used
+  //  * @returns
+  //  * A boolean meaning if the user has the specified Role.
+  //  */
+  // isUserInRole(role: string, resource?: string): boolean {
+  //   let hasRole: boolean;
+  //   hasRole = this._instance.hasResourceRole(role, resource);
+  //   if (!hasRole) {
+  //     hasRole = this._instance.hasRealmRole(role);
+  //   }
+  //   return hasRole;
+  // }
 
-  /**
-   * Return the roles of the logged user. The allRoles parameter, with default value
-   * true, will return the clientId and realm roles associated with the logged user. If set to false
-   * it will only return the user roles associated with the clientId.
-   *
-   * @param allRoles
-   * Flag to set if all roles should be returned.(Optional: default value is true)
-   * @returns
-   * Array of Roles associated with the logged user.
-   */
-  getUserRoles(allRoles: boolean = true): string[] {
-    let roles: string[] = [];
-    if (this._instance.resourceAccess) {
-      for (const key in this._instance.resourceAccess) {
-        if (this._instance.resourceAccess.hasOwnProperty(key)) {
-          const resourceAccess: any = this._instance.resourceAccess[key];
-          const clientRoles = resourceAccess['roles'] || [];
-          roles = roles.concat(clientRoles);
-        }
-      }
-    }
-    if (allRoles && this._instance.realmAccess) {
-      let realmRoles = this._instance.realmAccess['roles'] || [];
-      roles.push(...realmRoles);
-    }
-    return roles;
-  }
+  // /**
+  //  * Return the roles of the logged user. The allRoles parameter, with default value
+  //  * true, will return the clientId and realm roles associated with the logged user. If set to false
+  //  * it will only return the user roles associated with the clientId.
+  //  *
+  //  * @param allRoles
+  //  * Flag to set if all roles should be returned.(Optional: default value is true)
+  //  * @returns
+  //  * Array of Roles associated with the logged user.
+  //  */
+  // getUserRoles(allRoles: boolean = true): string[] {
+  //   let roles: string[] = [];
+  //   if (this._instance.resourceAccess) {
+  //     for (const key in this._instance.resourceAccess) {
+  //       if (this._instance.resourceAccess.hasOwnProperty(key)) {
+  //         const resourceAccess: any = this._instance.resourceAccess[key];
+  //         const clientRoles = resourceAccess['roles'] || [];
+  //         roles = roles.concat(clientRoles);
+  //       }
+  //     }
+  //   }
+  //   if (allRoles && this._instance.realmAccess) {
+  //     let realmRoles = this._instance.realmAccess['roles'] || [];
+  //     roles.push(...realmRoles);
+  //   }
+  //   return roles;
+  // }
 
-  /**
-   * Check if user is logged in.
-   *
-   * @returns
-   * A boolean that indicates if the user is logged in.
-   */
-  async isLoggedIn(): Promise<boolean> {
-    try {
-      if (!this._instance.authenticated) {
-        return false;
-      }
-      await this.updateToken(20);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
+  // /**
+  //  * Check if user is logged in.
+  //  *
+  //  * @returns
+  //  * A boolean that indicates if the user is logged in.
+  //  */
+  // async isLoggedIn(): Promise<boolean> {
+  //   try {
+  //     if (!this._instance.authenticated) {
+  //       return false;
+  //     }
+  //     await this.updateToken(20);
+  //     return true;
+  //   } catch (error) {
+  //     return false;
+  //   }
+  // }
 
-  /**
-   * Returns true if the token has less than minValidity seconds left before
-   * it expires.
-   *
-   * @param minValidity
-   * Seconds left. (minValidity) is optional. Default value is 0.
-   * @returns
-   * Boolean indicating if the token is expired.
-   */
-  isTokenExpired(minValidity: number = 0): boolean {
-    return this._instance.isTokenExpired(minValidity);
-  }
+  // /**
+  //  * Returns true if the token has less than minValidity seconds left before
+  //  * it expires.
+  //  *
+  //  * @param minValidity
+  //  * Seconds left. (minValidity) is optional. Default value is 0.
+  //  * @returns
+  //  * Boolean indicating if the token is expired.
+  //  */
+  // isTokenExpired(minValidity: number = 0): boolean {
+  //   return this._instance.isTokenExpired(minValidity);
+  // }
 
-  /**
-   * If the token expires within minValidity seconds the token is refreshed. If the
-   * session status iframe is enabled, the session status is also checked.
-   * Returns a promise telling if the token was refreshed or not. If the session is not active
-   * anymore, the promise is rejected.
-   *
-   * @param minValidity
-   * Seconds left. (minValidity is optional, if not specified 5 is used)
-   * @returns
-   * Promise with a boolean indicating if the token was succesfully updated.
-   */
-  updateToken(minValidity: number = 5): Promise<boolean> {
-    return new Promise(async (resolve, reject) => {
-      // TODO: this is a workaround until the silent refresh (issue #43)
-      // is not implemented, avoiding the redirect loop.
-      if (this._silentRefresh) {
-        if (this.isTokenExpired()) {
-          reject('Failed to refresh the token, or the session is expired');
-        } else {
-          resolve(true);
-        }
-        return;
-      }
+  // /**
+  //  * If the token expires within minValidity seconds the token is refreshed. If the
+  //  * session status iframe is enabled, the session status is also checked.
+  //  * Returns a promise telling if the token was refreshed or not. If the session is not active
+  //  * anymore, the promise is rejected.
+  //  *
+  //  * @param minValidity
+  //  * Seconds left. (minValidity is optional, if not specified 5 is used)
+  //  * @returns
+  //  * Promise with a boolean indicating if the token was succesfully updated.
+  //  */
+  // updateToken(minValidity: number = 5): Promise<boolean> {
+  //   return new Promise(async (resolve, reject) => {
+  //     // TODO: this is a workaround until the silent refresh (issue #43)
+  //     // is not implemented, avoiding the redirect loop.
+  //     if (this._silentRefresh) {
+  //       if (this.isTokenExpired()) {
+  //         reject('Failed to refresh the token, or the session is expired');
+  //       } else {
+  //         resolve(true);
+  //       }
+  //       return;
+  //     }
 
-      if (!this._instance) {
-        reject('Keycloak Angular library is not initialized.');
-        return;
-      }
+  //     if (!this._instance) {
+  //       reject('Keycloak Angular library is not initialized.');
+  //       return;
+  //     }
 
-      this._instance
-        .updateToken(minValidity)
-        .success(refreshed => {
-          resolve(refreshed);
-        })
-        .error(() => reject('Failed to refresh the token, or the session is expired'));
-    });
-  }
+  //     this._instance
+  //       .updateToken(minValidity)
+  //       .success(refreshed => {
+  //         resolve(refreshed);
+  //       })
+  //       .error(() => reject('Failed to refresh the token, or the session is expired'));
+  //   });
+  // }
 
-  /**
-   * Loads the user profile.
-   * Returns promise to set functions to be invoked if the profile was loaded
-   * successfully, or if the profile could not be loaded.
-   *
-   * @param forceReload
-   * If true will force the loadUserProfile even if its already loaded.
-   * @returns
-   * A promise with the KeycloakProfile data loaded.
-   */
-  loadUserProfile(forceReload: boolean = false): Promise<Keycloak.KeycloakProfile> {
-    return new Promise(async (resolve, reject) => {
-      if (this._userProfile && !forceReload) {
-        resolve(this._userProfile);
-        return;
-      }
+  // /**
+  //  * Loads the user profile.
+  //  * Returns promise to set functions to be invoked if the profile was loaded
+  //  * successfully, or if the profile could not be loaded.
+  //  *
+  //  * @param forceReload
+  //  * If true will force the loadUserProfile even if its already loaded.
+  //  * @returns
+  //  * A promise with the KeycloakProfile data loaded.
+  //  */
+  // loadUserProfile(forceReload: boolean = false): Promise<Keycloak.KeycloakProfile> {
+  //   return new Promise(async (resolve, reject) => {
+  //     if (this._userProfile && !forceReload) {
+  //       resolve(this._userProfile);
+  //       return;
+  //     }
 
-      if (!this._instance.authenticated) {
-        reject('The user profile was not loaded as the user is not logged in.');
-        return;
-      }
+  //     if (!this._instance.authenticated) {
+  //       reject('The user profile was not loaded as the user is not logged in.');
+  //       return;
+  //     }
 
-      this._instance
-        .loadUserProfile()
-        .success(result => {
-          this._userProfile = result as Keycloak.KeycloakProfile;
-          resolve(this._userProfile);
-        })
-        .error(() => reject('The user profile could not be loaded.'));
-    });
-  }
+  //     this._instance
+  //       .loadUserProfile()
+  //       .success(result => {
+  //         this._userProfile = result as Keycloak.KeycloakProfile;
+  //         resolve(this._userProfile);
+  //       })
+  //       .error(() => reject('The user profile could not be loaded.'));
+  //   });
+  // }
 
-  /**
-   * Returns the authenticated token, calling updateToken to get a refreshed one if
-   * necessary. If the session is expired this method calls the login method for a new login.
-   *
-   * @returns
-   * Promise with the generated token.
-   */
-  getToken(): Promise<string> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await this.updateToken(10);
-        resolve(this._instance.token);
-      } catch (error) {
-        this.login();
-      }
-    });
-  }
+  // /**
+  //  * Returns the authenticated token, calling updateToken to get a refreshed one if
+  //  * necessary. If the session is expired this method calls the login method for a new login.
+  //  *
+  //  * @returns
+  //  * Promise with the generated token.
+  //  */
+  // getToken(): Promise<string> {
+  //   return new Promise(async (resolve, reject) => {
+  //     try {
+  //       await this.updateToken(10);
+  //       resolve(this._instance.token);
+  //     } catch (error) {
+  //       this.login();
+  //     }
+  //   });
+  // }
 
-  /**
-   * Returns the logged username.
-   *
-   * @returns
-   * The logged username.
-   */
-  getUsername(): string {
-    if (!this._userProfile) {
-      throw new Error('User not logged in or user profile was not loaded.');
-    }
+  // /**
+  //  * Returns the logged username.
+  //  *
+  //  * @returns
+  //  * The logged username.
+  //  */
+  // getUsername(): string {
+  //   if (!this._userProfile) {
+  //     throw new Error('User not logged in or user profile was not loaded.');
+  //   }
 
-    return this._userProfile.username!;
-  }
+  //   return this._userProfile.username!;
+  // }
 
-  /**
-   * Clear authentication state, including tokens. This can be useful if application
-   * has detected the session was expired, for example if updating token fails.
-   * Invoking this results in onAuthLogout callback listener being invoked.
-   */
-  clearToken(): void {
-    this._instance.clearToken();
-  }
+  // /**
+  //  * Clear authentication state, including tokens. This can be useful if application
+  //  * has detected the session was expired, for example if updating token fails.
+  //  * Invoking this results in onAuthLogout callback listener being invoked.
+  //  */
+  // clearToken(): void {
+  //   this._instance.clearToken();
+  // }
 
-  /**
-   * Adds a valid token in header. The key & value format is:
-   * Authorization Bearer <token>.
-   * If the headers param is undefined it will create the Angular headers object.
-   *
-   * @param headers
-   * Updated header with Authorization and Keycloak token.
-   * @returns
-   * An observable with with the HTTP Authorization header and the current token.
-   */
-  addTokenToHeader(headers: HttpHeaders = new HttpHeaders()): Observable<HttpHeaders> {
-    return Observable.create(async (observer: Observer<any>) => {
-      try {
-        const token: string = await this.getToken();
-        headers = headers.set(this._authorizationHeaderName, this._bearerPrefix + token);
-        observer.next(headers);
-        observer.complete();
-      } catch (error) {
-        observer.error(error);
-      }
-    });
-  }
+  // /**
+  //  * Adds a valid token in header. The key & value format is:
+  //  * Authorization Bearer <token>.
+  //  * If the headers param is undefined it will create the Angular headers object.
+  //  *
+  //  * @param headers
+  //  * Updated header with Authorization and Keycloak token.
+  //  * @returns
+  //  * An observable with with the HTTP Authorization header and the current token.
+  //  */
+  // addTokenToHeader(headers: HttpHeaders = new HttpHeaders()): Observable<HttpHeaders> {
+  //   return Observable.create(async (observer: Observer<any>) => {
+  //     try {
+  //       const token: string = await this.getToken();
+  //       headers = headers.set(this._authorizationHeaderName, this._bearerPrefix + token);
+  //       observer.next(headers);
+  //       observer.complete();
+  //     } catch (error) {
+  //       observer.error(error);
+  //     }
+  //   });
+  // }
 
   /**
    * Binds the keycloak-js events to the keycloakEvents Subject
@@ -445,37 +440,37 @@ export class KeycloakService {
       this._keycloakEvents$.next({ args: authenticated, type: KeycloakEventType.OnReady });
   }
 
-  /**
-   * Returns the original Keycloak instance, if you need any customization that
-   * this Angular service does not support yet. Use with caution.
-   *
-   * @returns
-   * The KeycloakInstance from keycloak-js.
-   */
-  getKeycloakInstance(): Keycloak.KeycloakInstance {
-    return this._instance;
-  }
+  // /**
+  //  * Returns the original Keycloak instance, if you need any customization that
+  //  * this Angular service does not support yet. Use with caution.
+  //  *
+  //  * @returns
+  //  * The KeycloakInstance from keycloak-js.
+  //  */
+  // getKeycloakInstance(): Keycloak.KeycloakInstance {
+  //   return this._instance;
+  // }
 
-  /**
-   * Returns the excluded URLs that should not be considered by
-   * the http interceptor which automatically adds the authorization header in the Http Request.
-   *
-   * @returns
-   * The excluded urls that must not be intercepted by the KeycloakBearerInterceptor.
-   */
-  get excludedUrls(): ExcludedUrlRegex[] {
-    return this._excludedUrls;
-  }
+  // /**
+  //  * Returns the excluded URLs that should not be considered by
+  //  * the http interceptor which automatically adds the authorization header in the Http Request.
+  //  *
+  //  * @returns
+  //  * The excluded urls that must not be intercepted by the KeycloakBearerInterceptor.
+  //  */
+  // get excludedUrls(): ExcludedUrlRegex[] {
+  //   return this._excludedUrls;
+  // }
 
-  /**
-   * Flag to indicate if the bearer will be added to the authorization header.
-   *
-   * @returns
-   * Returns if the bearer interceptor was set to be disabled.
-   */
-  get enableBearerInterceptor(): boolean {
-    return this._enableBearerInterceptor;
-  }
+  // /**
+  //  * Flag to indicate if the bearer will be added to the authorization header.
+  //  *
+  //  * @returns
+  //  * Returns if the bearer interceptor was set to be disabled.
+  //  */
+  // get enableBearerInterceptor(): boolean {
+  //   return this._enableBearerInterceptor;
+  // }
 
   /**
    * Keycloak subject to monitor the events triggered by keycloak-js.

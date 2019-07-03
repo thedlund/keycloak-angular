@@ -40,4 +40,8 @@ export interface KeycloakConfig {
    * which flow and access type was chosen.
    */
   credentials?: Credentials;
+  /**
+   * Any eventual new attribute from Keycloak-js should be used by this parameter.
+   */
+  [attributeName: string]: any;
 }

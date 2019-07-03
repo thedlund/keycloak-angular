@@ -7,9 +7,7 @@
  */
 
 import { BearerInterceptorOption } from './bearer-interceptor-options';
-
-import { KeycloakConfig } from '../interfaces/keycloak-config';
-import { KeycloakInitOptions } from '../interfaces/keycloak-init-options';
+import { KeycloakConfig } from './keycloak-config';
 
 /**
  * keycloak-angular initialization options.
@@ -27,7 +25,7 @@ export interface KeycloakOptions {
   /**
    * Options to initialize the adapter. Used by keycloak-js.
    */
-  initOptions?: KeycloakInitOptions;
+  initOptions?: Keycloak.KeycloakInitOptions;
   /**
    * TODO: Add documentation to the new parameter
    */

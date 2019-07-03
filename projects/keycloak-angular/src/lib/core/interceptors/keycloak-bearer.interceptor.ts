@@ -13,7 +13,6 @@ import { Observable } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
 import { KeycloakService } from '../services/keycloak.service';
-import { ExcludedUrlRegex } from '../models/keycloak-options';
 
 /**
  * This interceptor includes the bearer by default in all HttpClient requests.
@@ -33,17 +32,17 @@ export class KeycloakBearerInterceptor implements HttpInterceptor {
    * @param excludedUrlRegex contains the url pattern and the http methods,
    * excluded from adding the bearer at the Http Request.
    */
-  private isUrlExcluded(
-    { method, url }: HttpRequest<any>,
-    { urlPattern, httpMethods }: ExcludedUrlRegex
-  ): boolean {
-    let httpTest =
-      httpMethods.length === 0 || httpMethods.join().indexOf(method.toUpperCase()) > -1;
+  // private isUrlExcluded(
+  //   { method, url }: HttpRequest<any>,
+  //   { urlPattern, httpMethods }: ExcludedUrlRegex
+  // ): boolean {
+  //   let httpTest =
+  //     httpMethods.length === 0 || httpMethods.join().indexOf(method.toUpperCase()) > -1;
 
-    let urlTest = urlPattern.test(url);
+  //   let urlTest = urlPattern.test(url);
 
-    return httpTest && urlTest;
-  }
+  //   return httpTest && urlTest;
+  // }
 
   /**
    * Intercept implementation that checks if the request url matches the excludedUrls.
@@ -53,21 +52,22 @@ export class KeycloakBearerInterceptor implements HttpInterceptor {
    * @param next
    */
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const { enableBearerInterceptor, excludedUrls } = this.keycloak;
-    if (!enableBearerInterceptor) {
-      return next.handle(req);
-    }
+    // const { enableBearerInterceptor, excludedUrls } = this.keycloak;
+    // if (!enableBearerInterceptor) {
+    //   return next.handle(req);
+    // }
 
-    const shallPass: boolean = excludedUrls.findIndex(item => this.isUrlExcluded(req, item)) > -1;
-    if (shallPass) {
-      return next.handle(req);
-    }
+    // const shallPass: boolean = excludedUrls.findIndex(item => this.isUrlExcluded(req, item)) > -1;
+    // if (shallPass) {
+    //   return next.handle(req);
+    // }
 
-    return this.keycloak.addTokenToHeader(req.headers).pipe(
-      mergeMap(headersWithBearer => {
-        const kcReq = req.clone({ headers: headersWithBearer });
-        return next.handle(kcReq);
-      })
-    );
+    // return this.keycloak.addTokenToHeader(req.headers).pipe(
+    //   mergeMap(headersWithBearer => {
+    //     const kcReq = req.clone({ headers: headersWithBearer });
+    //     return next.handle(kcReq);
+    //   })
+    // );
+    return null;
   }
 }

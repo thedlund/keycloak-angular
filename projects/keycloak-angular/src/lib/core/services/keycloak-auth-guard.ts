@@ -38,11 +38,10 @@ export abstract class KeycloakAuthGuard implements CanActivate {
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       try {
-        this.authenticated = await this.keycloakAngular.isLoggedIn();
-        this.roles = await this.keycloakAngular.getUserRoles(true);
-
-        const result = await this.isAccessAllowed(route, state);
-        resolve(result);
+        // this.authenticated = await this.keycloakAngular.isLoggedIn();
+        // this.roles = await this.keycloakAngular.getUserRoles(true);
+        // const result = await this.isAccessAllowed(route, state);
+        // resolve(result);
       } catch (error) {
         reject('An error happened during access validation. Details:' + error);
       }
