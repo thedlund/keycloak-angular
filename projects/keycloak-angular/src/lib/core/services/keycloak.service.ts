@@ -37,7 +37,7 @@ export class KeycloakService {
    * Observer for the keycloak events
    */
   private _keycloakEvents$: Subject<KeycloakEvent> = new Subject<KeycloakEvent>();
-  
+
   /**
    * Keycloak initialization. It should be called to initialize the adapter.
    * Options is a object with 2 main parameters: config and initOptions. The first one
@@ -93,7 +93,7 @@ export class KeycloakService {
       const { config, initOptions } = options;
       this._initOptions = initOptions;
 
-      this._instance = Keycloak(config);
+      this._instance = this.getKeycloak(config);
 
       this.bindsKeycloakEvents();
 
@@ -493,5 +493,9 @@ export class KeycloakService {
    */
   get keycloakEvents$(): Subject<KeycloakEvent> {
     return this._keycloakEvents$;
+  }
+
+  getKeycloak(config): Keycloak.KeycloakInstance {
+    return Keycloak(config);
   }
 }

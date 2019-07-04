@@ -29,5 +29,5 @@ export interface KeycloakOptions {
   /**
    * TODO: Add documentation to the new parameter
    */
-  bearerInterceptorOptions?: BearerInterceptorOption[];
+  bearerInterceptorOptions?: BearerInterceptorOption;
 }
