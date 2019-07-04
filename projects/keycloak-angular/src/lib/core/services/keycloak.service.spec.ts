@@ -6,20 +6,33 @@
  * found in the LICENSE file at https://github.com/mauriciovigolo/keycloak-angular/LICENSE
  */
 
-import { TestBed, inject } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+
+import * as Keycloak from 'keycloak-js';
 
 import { KeycloakService } from './keycloak.service';
 
 describe('KeycloakService', () => {
+  let keycloakService: KeycloakService;
+  let keycloakInstanceSpy: Keycloak.KeycloakInstance;
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [KeycloakService]
     });
+    keycloakService = TestBed.get(KeycloakService);
+    spyOn(keycloakService, 'getKeycloak').and.returnValue(true);
   });
 
-  it('Should be created', inject([KeycloakService], (service: KeycloakService) => {
-    expect(service).toBeTruthy();
-  }));
+  it('Should be created', () => {
+    expect(keycloakService).toBeTruthy();
+  });
+
+  it('should initialize the keycloak adapter ', () => {
+    const authenticated = keycloakService.init();
+    console.log('aqui', authenticated);
+    expect(authenticated).toBeUndefined();
+  });
 
   // describe('#loadExcludedUrls', () => {
   //   it('Should create the ExcludedUrlRegex objects if the bearerExcludedUrls arg is a string array', inject(
