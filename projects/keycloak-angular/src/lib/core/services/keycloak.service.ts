@@ -547,7 +547,7 @@ export class KeycloakService {
    * The excluded urls that must not be intercepted by the KeycloakBearerInterceptor.
    */
   get includedUrls(): ExcludedUrlRegex[] {
-    return this.includedUrls;
+    return this._includedUrls;
   }
 
   /**
