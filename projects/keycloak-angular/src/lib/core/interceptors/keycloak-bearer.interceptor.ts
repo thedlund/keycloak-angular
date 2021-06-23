@@ -74,6 +74,22 @@ export class KeycloakBearerInterceptor implements HttpInterceptor {
         return next.handle(req);
     }
       
+    return from(this.keycloak.isLoggedIn()).pipe(
+      mergeMap((loggedIn: boolean) => loggedIn
+        ? this.handleRequestWithTokenHeader(req, next)
+        : next.handle(req))
+    );
+  }
+  /**
+   * Adds the token of the current user to the Authorization header
+   *
+   * @param req
+   * @param next
+   */
+   private handleRequestWithTokenHeader(
+    req: HttpRequest<any>,
+    next: HttpHandler
+  ): Observable<any> {
     return this.keycloak.addTokenToHeader(req.headers).pipe(
       mergeMap(headersWithBearer => {
         const kcReq = req.clone({ headers: headersWithBearer });
@@ -81,4 +97,5 @@ export class KeycloakBearerInterceptor implements HttpInterceptor {
       })
     );
   }
+
 }
