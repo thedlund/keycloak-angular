@@ -18,7 +18,7 @@ import { Observable, from } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
 import { KeycloakService } from '../services/keycloak.service';
-import { ExcludedUrlRegex } from '../interfaces/keycloak-options';
+import { IncludedUrlRegex } from '../interfaces/keycloak-options';
 
 /**
  * This interceptor includes the bearer by default in all HttpClient requests.
@@ -38,15 +38,15 @@ export class KeycloakBearerInterceptor implements HttpInterceptor {
    * @param excludedUrlRegex contains the url pattern and the http methods,
    * excluded from adding the bearer at the Http Request.
    */
-  private isUrlExcluded(
+  private isUrlIncluded(
     { method, url }: HttpRequest<any>,
-    { urlPattern, httpMethods }: ExcludedUrlRegex
+    { urlPattern, httpMethods }: IncludedUrlRegex
   ): boolean {
-    const httpTest =
+    let httpTest =
       httpMethods.length === 0 ||
       httpMethods.join().indexOf(method.toUpperCase()) > -1;
 
-    const urlTest = urlPattern.test(url);
+    let urlTest = urlPattern.test(url);
 
     return httpTest && urlTest;
   }
@@ -62,31 +62,31 @@ export class KeycloakBearerInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    const { enableBearerInterceptor, excludedUrls } = this.keycloak;
+    const { enableBearerInterceptor, includedUrls } = this.keycloak;
     if (!enableBearerInterceptor) {
       return next.handle(req);
     }
 
-    const shallPass: boolean =
-      excludedUrls.findIndex(item => this.isUrlExcluded(req, item)) > -1;
-    if (shallPass) {
-      return next.handle(req);
-    }
+    const shallPassBearer: boolean =
+      includedUrls.findIndex(item => this.isUrlIncluded(req, item)) > -1;
 
+    if (!shallPassBearer) {
+        return next.handle(req);
+    }
+      
     return from(this.keycloak.isLoggedIn()).pipe(
       mergeMap((loggedIn: boolean) => loggedIn
         ? this.handleRequestWithTokenHeader(req, next)
         : next.handle(req))
     );
   }
-
   /**
    * Adds the token of the current user to the Authorization header
    *
    * @param req
    * @param next
    */
-  private handleRequestWithTokenHeader(
+   private handleRequestWithTokenHeader(
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<any> {
@@ -97,4 +97,5 @@ export class KeycloakBearerInterceptor implements HttpInterceptor {
       })
     );
   }
+
 }
